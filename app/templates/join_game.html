@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load sass_tags %}
+
+{% block title %}Join Game{% endblock %}
+
+{% block styles %}
+  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="centered">
+      <form action="/join_lobby" method="post">
+        {% csrf_token %}
+        <label for="name">Name:</label>
+        <input id="name" type="text" name="name" value="{{ name }}">
+        <label for="game">Game:</label>
+        <input id="game" type="text" naem="game" value="{{ game }}">
+        <input type="submit" value="Join Game">
+      </form>
+  </div>
+</div>
+{% endblock %}

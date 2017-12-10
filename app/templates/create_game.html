@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load sass_tags %}
+
+{% block title %}Create Game{% endblock %}
+
+{% block styles %}
+  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="centered">
+      <form action="/create_game" method="post">
+        {% csrf_token %}
+        <label for="name">Name:</label>
+        <input id="name" type="text" name="name" value="{{ name }}">
+        <input type="submit" value="Create Game">
+      </form>
+  </div>
+</div>
+{% endblock %}
