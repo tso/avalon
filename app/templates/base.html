@@ -4,8 +4,10 @@
   <head>
     <title>{% block title %}{% endblock %}</title>
     {% block styles %}{% endblock %}
+    {% block head %}{% endblock %}
   </head>
   <body>
+    <a href="{% url 'index' %}">Home</a>
     <main>{% block content %}{% endblock %}</main>
   </body>
 </html>

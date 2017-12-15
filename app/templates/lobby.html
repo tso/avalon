@@ -3,6 +3,10 @@
 
 {% block title %}Lobby{% endblock %}
 
+{% block head %}
+  <meta http-equiv="refresh" content="5" >
+{% endblock %}
+
 {% block styles %}
   <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -10,7 +14,13 @@
 {% block content %}
 <div class="container">
   <div class="centered">
-    <p>Game: {{ game }}<p>
+    <p>Name: {{ player.name }}</p>
+    <p>Joinable ID: {{ game.joinable_id }}</p>
+    <p>Players:
+      {% for player in players %}
+        {{ player.name }}
+      {% endfor %}
+    </p>
   </div>
 </div>
 {% endblock %}
