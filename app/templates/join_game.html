@@ -23,10 +23,10 @@
   </div>
   <div class="form-group">
       <label for="name">Game Code</label>
-      <input class="form-control" id="game-input" 
-             name="game" value="{{ game }}" 
+      <input class="form-control" id="joinable_id-input" 
+             name="joinable_id" value="{{ joinable_id }}" 
              aria-describedby="name" placeholder="Enter game code"
-             required="required">
+             required="required" maxlength="4">
     </div>
   <button type="submit" class="btn btn-primary btn-lg btn-block">Join Game</button>
 </form>

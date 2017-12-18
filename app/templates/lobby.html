@@ -17,7 +17,7 @@
         <li class="breadcrumb-item"><a href="{% url 'join_game' %}">Join Game</a></li>
       {% endif %}
       
-      <li class="breadcrumb-item"><a href="#">Lobby</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lobby' game_id=game.id player_id=self.id %}">Lobby</a></li>
     </ol>
   </nav>
 {% endblock %}
@@ -29,17 +29,28 @@
   <thead>
     <tr>
         <th>Players</th>
+        {% if is_host %}
+        <th></th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
-    {% for player, is_you, is_host in players %}
+    {% for player, is_you, player_is_host in players %}
       <tr>
         <td>
           {% if is_you %}<b>{% endif %}
           {{ player.name }}
-          {% if is_host %}(host){% endif %}
+          {% if player_is_host %}(host){% endif %}
           {% if is_you %}</b>{% endif %}
         </td>
+        {% if is_host and not is_you %}
+          <td>
+            <a href="{% url 'kick' game_id=game.id player_id=self.id kicked_player_id=player.id %}" 
+               class="close text-danger" aira-label="Close">
+              <span aira-hidden="true">&times;</span>
+            </a>
+          </td>
+        {% endif %}
 
       </tr>
     {% endfor %}
@@ -47,6 +58,6 @@
 </table>
 
 {% if is_host %}
-  <a class="btn btn-primary btn-lg btn-block" href="#">Start Game</a>
+  <a class="btn btn-primary btn-lg btn-block" href="{% url 'game' game_id=game.id player_id=self.id %}">Start Game</a>
 {% endif %}
 {% endblock %}

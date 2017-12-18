@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 import random
 import string
 import uuid
@@ -28,9 +29,12 @@ class User(AbstractUser):
 
 
 class GameManager(models.Manager):
-    def create_game(self):
-        game = self.model(joinable_id=''.join(
-            random.choices(string.ascii_uppercase, k=4)))
+    def create_game(self, roles):
+        joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
+        while self.filter(is_started=False, joinable_id=joinable_id):
+            joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
+
+        game = self.model(joinable_id=joinable_id, roles=roles)
         game.save(using=self._db)
         return game
 
@@ -38,15 +42,19 @@ class GameManager(models.Manager):
 class Game(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     joinable_id = models.CharField(max_length=4)
-    started = models.BooleanField(default=False)
+    is_started = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    roles = ArrayField(models.CharField(max_length=12, choices=ROLES))
 
     def start(self):
-        self.started = True
+        self.is_started = True
         self.save()
 
-    objects = GameManager()
+    def players(self):
+        return self.player_set.filter(is_kicked=False).all()
+
+    games = GameManager()
 
 
 class PlayerManager(models.Manager):
@@ -76,14 +84,19 @@ class Player(models.Model):
     role = models.CharField(max_length=12, choices=ROLES)
     is_guest = models.BooleanField()
     is_host = models.BooleanField()
+    is_kicked = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
-    objects = PlayerManager()
+    players = PlayerManager()
 
     def set_role(self, role):
         if role not in ROLES:
             raise ValueError('Role must be valid')
         self.role = role
+        self.save()
+
+    def kick(self):
+        self.is_kicked = True
         self.save()

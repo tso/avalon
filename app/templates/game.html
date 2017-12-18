@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Game{% endblock %}
+
+{% block nav %}
+  <nav aria-label="breadcrumb" role="navigation">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      
+      {% if is_host %}
+        <li class="breadcrumb-item"><a href="{% url 'create_game' %}">Create Game</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'join_game' %}">Join Game</a></li>
+      {% endif %}
+      
+      <li class="breadcrumb-item"><a href="{% url 'lobby' game_id=game.id player_id=player.id %}">Lobby</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'game' game_id=game.id player_id=player.id %}">Game</a></li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block content %}
+You are: [role]
+You saw: [players]
+{% endblock %}
