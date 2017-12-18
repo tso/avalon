@@ -1,21 +1,24 @@
 {% extends "base.html" %}
-{% load sass_tags %}
 
 {% block title %}Create Game{% endblock %}
 
-{% block styles %}
-  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% block nav %}
+<nav aria-label="breadcrumb" role="navigation">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'create_game' %}">Create Game</a></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="centered">
-      <form action="/create_game" method="post">
-        {% csrf_token %}
-        <label for="name">Name:</label>
-        <input id="name" type="text" name="name" value="{{ name }}">
-        <input type="submit" value="Create Game">
-      </form>
+<form action="/create_game" method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input class="form-control" id="name-input" name="name" value="{{ name }}" aria-describedby="name" placeholder="Enter name">
+    <small id="nameHelp" class="form-text text-muted">Please use whatever people call you</small>
   </div>
-</div>
+  <button type="submit" class="btn btn-primary btn-lg btn-block">Create Game</button>
+</form>
 {% endblock %}

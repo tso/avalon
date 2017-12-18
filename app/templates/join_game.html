@@ -1,23 +1,33 @@
 {% extends "base.html" %}
-{% load sass_tags %}
 
 {% block title %}Join Game{% endblock %}
 
-{% block styles %}
-  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% block nav %}
+<nav aria-label="breadcrumb" role="navigation">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'join_game' %}">Join Game</a></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="centered">
-      <form action="/join_game" method="post">
-        {% csrf_token %}
-        <label for="name">Name:</label>
-        <input id="name" type="text" name="name" value="{{ name }}">
-        <label for="game">Game:</label>
-        <input id="game" type="text" name="game" value="{{ game }}">
-        <input type="submit" value="Join Game">
-      </form>
+<form action="/join_game" method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input class="form-control" id="name-input" name="name" 
+           value="{{ name }}" aria-describedby="name" placeholder="Enter name"
+           required="required">
+    <small id="nameHelp" class="form-text text-muted">Please use whatever people call you</small>
   </div>
-</div>
+  <div class="form-group">
+      <label for="name">Game Code</label>
+      <input class="form-control" id="game-input" 
+             name="game" value="{{ game }}" 
+             aria-describedby="name" placeholder="Enter game code"
+             required="required">
+    </div>
+  <button type="submit" class="btn btn-primary btn-lg btn-block">Join Game</button>
+</form>
 {% endblock %}

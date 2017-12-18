@@ -50,20 +50,21 @@ class Game(models.Model):
 
 
 class PlayerManager(models.Manager):
-    def _create_player(self, user, game, name):
+    def _create_player(self, user, game, name, is_host):
         if not game:
             raise ValueError('The game must be set')
 
         is_guest = user is None
-        player = self.model(user=user, name=name, game=game, is_guest=is_guest)
+        player = self.model(user=user, name=name, game=game,
+                            is_guest=is_guest, is_host=is_host)
         player.save(using=self._db)
         return player
 
-    def create_player(self, user, game):
-        return self._create_player(user, game, None)
+    def create_player(self, user, game, is_host):
+        return self._create_player(user, game, None, is_host)
 
-    def create_guest_player(self, game, name):
-        return self._create_player(None, game, name)
+    def create_guest_player(self, game, name, is_host):
+        return self._create_player(None, game, name, is_host)
 
 
 class Player(models.Model):
@@ -71,8 +72,13 @@ class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=30)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+
     role = models.CharField(max_length=12, choices=ROLES)
     is_guest = models.BooleanField()
+    is_host = models.BooleanField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     objects = PlayerManager()
 

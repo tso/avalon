@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load sass_tags %}
 
 {% block title %}Lobby{% endblock %}
 
@@ -7,20 +6,47 @@
   <meta http-equiv="refresh" content="5" >
 {% endblock %}
 
-{% block styles %}
-  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% block nav %}
+  <nav aria-label="breadcrumb" role="navigation">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      
+      {% if is_host %}
+        <li class="breadcrumb-item"><a href="{% url 'create_game' %}">Create Game</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'join_game' %}">Join Game</a></li>
+      {% endif %}
+      
+      <li class="breadcrumb-item"><a href="#">Lobby</a></li>
+    </ol>
+  </nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="centered">
-    <p>Name: {{ player.name }}</p>
-    <p>Joinable ID: {{ game.joinable_id }}</p>
-    <p>Players:
-      {% for player in players %}
-        {{ player.name }}
-      {% endfor %}
-    </p>
-  </div>
-</div>
+<p>Joinable ID: <b>{{ game.joinable_id }}</b></p>
+
+<table class="table">
+  <thead>
+    <tr>
+        <th>Players</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for player, is_you, is_host in players %}
+      <tr>
+        <td>
+          {% if is_you %}<b>{% endif %}
+          {{ player.name }}
+          {% if is_host %}(host){% endif %}
+          {% if is_you %}</b>{% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if is_host %}
+  <a class="btn btn-primary btn-lg btn-block" href="#">Start Game</a>
+{% endif %}
 {% endblock %}

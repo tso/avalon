@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% load sass_tags %}
 
 {% block title %}Index{% endblock %}
 
-{% block styles %}
-  <link href="{% sass_src 'stylesheets/style.scss' %}" rel="stylesheet" type="text/css">
+{% block nav %}
+<nav aria-label="breadcrumb" role="navigation">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <a href="{% url 'create_game' %}">Create Game</a>
-  <a href="{% url 'join_game' %}">Join Game</a>
-</div>
+  <a class="btn btn-primary btn-lg btn-block" href="{% url 'create_game' %}">Create Game</a>
+  <a class="btn btn-secondary btn-lg btn-block" href="{% url 'join_game' %}">Join Game</a>
 {% endblock %}
