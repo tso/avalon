@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
 import random
 import string
 import uuid
@@ -29,12 +28,14 @@ class User(AbstractUser):
 
 
 class GameManager(models.Manager):
-    def create_game(self, roles):
+    def create_game(self, has_mordred, has_oberon):
         joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
+        # For the set of all unstarted games joinable ID must be unique
         while self.filter(is_started=False, joinable_id=joinable_id):
             joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
 
-        game = self.model(joinable_id=joinable_id, roles=roles)
+        game = self.model(joinable_id=joinable_id,
+                          has_mordred=has_mordred, has_oberon=has_oberon)
         game.save(using=self._db)
         return game
 
@@ -45,7 +46,9 @@ class Game(models.Model):
     is_started = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    roles = ArrayField(models.CharField(max_length=12, choices=ROLES))
+
+    has_mordred = models.BooleanField(default=False)
+    has_oberon = models.BooleanField(default=False)
 
     def start(self):
         self.is_started = True

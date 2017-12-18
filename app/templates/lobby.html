@@ -23,12 +23,18 @@
 {% endblock %}
 
 {% block content %}
-<p>Joinable ID: <b>{{ game.joinable_id }}</b></p>
+{% if game.is_started %}
+<a class="btn btn-success btn-lg btn-block mb-3" 
+   href="{% url 'game' game_id=game.id player_id=self.id %}">Go to game</a>
+{% endif %}
+
+<p>Game code: <b>{{ game.joinable_id }}</b></p>
+<p>Roles: {{ roles|join:", " }}</p>
 
 <table class="table">
   <thead>
     <tr>
-        <th>Players</th>
+        <th>Players ({{ players|length }} total)</th>
         {% if is_host %}
         <th></th>
       {% endif %}
@@ -36,28 +42,26 @@
   </thead>
   <tbody>
     {% for player, is_you, player_is_host in players %}
-      <tr>
+      <tr class="{% if is_you %} table-active {% endif %}">
         <td>
-          {% if is_you %}<b>{% endif %}
           {{ player.name }}
           {% if player_is_host %}(host){% endif %}
-          {% if is_you %}</b>{% endif %}
         </td>
-        {% if is_host and not is_you %}
-          <td>
-            <a href="{% url 'kick' game_id=game.id player_id=self.id kicked_player_id=player.id %}" 
-               class="close text-danger" aira-label="Close">
-              <span aira-hidden="true">&times;</span>
-            </a>
-          </td>
-        {% endif %}
-
+        <td>
+            {% if is_host and not is_you and not game.is_started %}
+              <a href="{% url 'kick' game_id=game.id player_id=self.id kicked_player_id=player.id %}" 
+                class="close text-danger" aira-label="Close">
+                <span aira-hidden="true">&times;</span>
+              </a>
+            {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
 
-{% if is_host %}
-  <a class="btn btn-primary btn-lg btn-block" href="{% url 'game' game_id=game.id player_id=self.id %}">Start Game</a>
+{% if is_host and not game.is_started %}
+  <a class="btn btn-primary btn-lg btn-block {% if players|length < 5 %} disabled {% endif %}" 
+     href="{% url 'game' game_id=game.id player_id=self.id %}">Start Game</a>
 {% endif %}
 {% endblock %}

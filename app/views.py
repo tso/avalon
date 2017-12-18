@@ -19,8 +19,15 @@ def lobby_view(request, game_id, player_id):
     players = sorted(game.players(), key=operator.attrgetter('created_at'))
     players = [(p, p == player, p.is_host) for p in players]
 
+    roles = []
+    if game.has_mordred:
+        roles.append('Mordred')
+    if game.has_oberon:
+        roles.append('Oberon')
+
     return render(request, 'lobby.html', {
         'game': game,
+        'roles': roles,
         'self': player,
         'players': players,
         'is_host': player.is_host,
@@ -28,6 +35,9 @@ def lobby_view(request, game_id, player_id):
 
 
 def kick_view(request, game_id, player_id, kicked_player_id):
+    game = Game.games.get(pk=game_id)
+    if game.is_started:
+        return redirect('lobby', game_id=game_id, player_id=player_id)
     kicked_player = Player.players.get(pk=kicked_player_id)
     kicked_player.kick()
     return redirect('lobby', game_id=game_id, player_id=player_id)
@@ -35,12 +45,19 @@ def kick_view(request, game_id, player_id, kicked_player_id):
 
 def game_view(request, game_id, player_id):
     game = Game.games.get(pk=game_id)
-    player = Player.players.get(pk=player_id)
-    if not game.is_started and player.is_host:
-        # If we're not the host then we shouldn't be trying to start
-        # the game.
-        pass
+    if len(game.players()) < 5:
+        messages.add_message(request, messages.ERROR, 'Cannot start a game with less than 5 players')
+        return redirect('lobby', game_id=game_id, player_id=player_id)
 
+    player = Player.players.get(pk=player_id)
+    if not game.is_started:
+        if not player.is_host:
+            messages.add_message(request, messages.ERROR, 'Only the host can start the game')
+            return redirect('lobby', game_id=game_id, player_id=player_id)
+
+        game.start() # should assign roles etc
+
+    # should give list of who they saw
     return render(request, 'game.html', {
         'game': game,
         'player': player,
@@ -55,7 +72,10 @@ def create_game_view(request):
             messages.add_message(request, messages.ERROR, 'Name cannot be blank')
             return render(request, 'create_game.html')
 
-        game = Game.games.create_game([])
+        game = Game.games.create_game(
+            request.POST.get('has_mordred', 'off') == 'on',
+            request.POST.get('has_oberon', 'off') == 'on',
+        )
         player = Player.players.create_guest_player(
             game=game, name=name.title(), is_host=True)
         return redirect('lobby', game_id=game.id, player_id=player.id)
