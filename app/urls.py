@@ -8,5 +8,5 @@ urlpatterns = [
     path('join_game', views.join_game_view, name='join_game'),
     path('lobby/<uuid:game_id>/<uuid:player_id>', views.lobby_view, name='lobby'),
     path('game/<uuid:game_id>/<uuid:player_id>', views.game_view, name='game'),
-    path('kick/<uuid:game_id>/<uuid:player_id>/<uuid:kicked_player_id>', views.kick_view, name='kick'),
+    path('kick/<uuid:game_id>/<uuid:player_id>/<uuid:player_token>', views.kick_view, name='kick'),
 ]

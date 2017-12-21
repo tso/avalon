@@ -80,6 +80,7 @@ class PlayerManager(models.Manager):
 
 class Player(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=30)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)

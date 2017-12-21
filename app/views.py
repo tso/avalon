@@ -30,15 +30,19 @@ def lobby_view(request, game_id, player_id):
         'roles': roles,
         'self': player,
         'players': players,
-        'is_host': player.is_host,
     })
 
 
-def kick_view(request, game_id, player_id, kicked_player_id):
+def kick_view(request, game_id, player_id, player_token):
     game = Game.games.get(pk=game_id)
     if game.is_started:
         return redirect('lobby', game_id=game_id, player_id=player_id)
-    kicked_player = Player.players.get(pk=kicked_player_id)
+    player = Player.players.get(pk=player_id)
+    if not player.is_host:
+        messages.add_message(request, messages.ERROR, 'Only the host can kick players')
+        return redirect('lobby', game_id=game_id, player_id=player_id)
+
+    kicked_player = Player.players.get(token=player_token)
     kicked_player.kick()
     return redirect('lobby', game_id=game_id, player_id=player_id)
 
