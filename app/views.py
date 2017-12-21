@@ -14,6 +14,7 @@ def lobby_view(request, game_id, player_id):
 
     player = Player.players.get(pk=player_id)
     if player.is_kicked:
+        messages.add_message(request, messages.ERROR, 'You\'ve been kicked')
         return redirect('index')
 
     players = sorted(game.players(), key=operator.attrgetter('created_at'))

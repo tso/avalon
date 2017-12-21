@@ -19,8 +19,7 @@
 {% endblock %}
 
 {% block script %}
-function getHTML(url, callback)
-{
+function getHTML(url, callback) {
   if (!window.XMLHttpRequest) return;
   var xhr = new XMLHttpRequest();
 
@@ -41,6 +40,12 @@ setInterval(function() {
     let response_html = response.querySelector('#content');
     if (!current_html.isEqualNode(response_html)) {
       current_html.innerHTML = response_html.innerHTML;
+      // Detect whether we've been kicked or not (if we have then we hard
+      // refresh).
+      if (current_html.children[1].innerText == "Create Game"
+       && current_html.children[2].innerText == "Join Game") {
+        window.location.reload(true);
+      }
     }
   })
 }, 2000);
