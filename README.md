@@ -1,6 +1,13 @@
-# avalon
+# Avalon
 An avalon jackbox-esque web app which handles nightphase automatically
 
-## Setting up Postgres
+## Dev Setup
 
-Follow: https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04
+```bash
+python3.6 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+mkdir tmp
+python manage.py migrate
+python manage.py runserver
+```

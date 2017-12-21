@@ -1,26 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from enumfields import Enum, EnumField
 import random
 import string
 import uuid
 
-VANILLA_TOWN = 'VANILLA_TOWN'
-MERLIN = 'MERLIN'
-PERCIVAL = 'PERCIVAL'
-MORGANA = 'MORGANA'
-ASSASSIN = 'ASSASSIN'
-VANILA_BAD = 'VANILLA_BAD'
-OBERON = 'OBERON'
-
-ROLES = (
-    (VANILLA_TOWN, 'Vanilla Town'),
-    (MERLIN, 'Merlin'),
-    (PERCIVAL, 'Percival'),
-    (MORGANA, 'Morgana'),
-    (ASSASSIN, 'Assassin'),
-    (VANILA_BAD, 'Vanilla Bad'),
-    (OBERON, 'Oberon'),
-)
+class Role(Enum):
+    MERLIN = 'merlin'
+    PERCIVAL = 'percival'
+    VANILLA_GOOD = 'vanilla_good'
+    VANILLA_BAD = 'vanilla_bad'
+    MORGANA = 'morgana'
+    ASSASSIN = 'assassin'
+    OBERON = 'oberon'
 
 
 class User(AbstractUser):
@@ -85,7 +77,7 @@ class Player(models.Model):
     name = models.CharField(max_length=30)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
 
-    role = models.CharField(max_length=12, choices=ROLES)
+    role = EnumField(Role, max_length=12, null=True)
     is_guest = models.BooleanField()
     is_host = models.BooleanField()
     is_kicked = models.BooleanField(default=False)
@@ -96,8 +88,6 @@ class Player(models.Model):
     players = PlayerManager()
 
     def set_role(self, role):
-        if role not in ROLES:
-            raise ValueError('Role must be valid')
         self.role = role
         self.save()
 

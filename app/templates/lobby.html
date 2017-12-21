@@ -2,29 +2,53 @@
 
 {% block title %}Lobby{% endblock %}
 
-{% block head %}
-  <meta http-equiv="refresh" content="5" >
-{% endblock %}
-
 {% block nav %}
   <nav aria-label="breadcrumb" role="navigation">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-      
-      {% if is_host %}
+
+      {% if self.is_host %}
         <li class="breadcrumb-item"><a href="{% url 'create_game' %}">Create Game</a></li>
       {% else %}
         <li class="breadcrumb-item"><a href="{% url 'join_game' %}">Join Game</a></li>
       {% endif %}
-      
+
       <li class="breadcrumb-item"><a href="{% url 'lobby' game_id=game.id player_id=self.id %}">Lobby</a></li>
     </ol>
   </nav>
 {% endblock %}
 
+{% block script %}
+function getHTML(url, callback)
+{
+  if (!window.XMLHttpRequest) return;
+  var xhr = new XMLHttpRequest();
+
+  xhr.onload = function() {
+    if (callback && typeof(callback) === 'function') {
+      callback(this.responseXML);
+    }
+  }
+
+  xhr.open('GET', url, true);
+  xhr.responseType = 'document';
+  xhr.send();
+}
+
+setInterval(function() {
+  getHTML(window.location.href, function(response) {
+    let current_html = document.querySelector('#content');
+    let response_html = response.querySelector('#content');
+    if (!current_html.isEqualNode(response_html)) {
+      current_html.innerHTML = response_html.innerHTML;
+    }
+  })
+}, 2000);
+{% endblock %}
+
 {% block content %}
 {% if game.is_started %}
-<a class="btn btn-success btn-lg btn-block mb-3" 
+<a class="btn btn-success btn-lg btn-block mb-3"
    href="{% url 'game' game_id=game.id player_id=self.id %}">Go to game</a>
 {% endif %}
 
@@ -49,9 +73,9 @@
         </td>
         <td>
             {% if self.is_host and not is_you and not game.is_started %}
-              <a href="{% url 'kick' game_id=game.id player_id=self.id player_token=player.token %}" 
-                class="close text-danger" aira-label="Close">
-                <span aira-hidden="true">&times;</span>
+              <a href="{% url 'kick' game_id=game.id player_id=self.id player_token=player.token %}"
+                class="close text-danger" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
               </a>
             {% endif %}
         </td>
@@ -61,7 +85,7 @@
 </table>
 
 {% if self.is_host and not game.is_started %}
-  <a class="btn btn-primary btn-lg btn-block {% if players|length < 5 %} disabled {% endif %}" 
+  <a class="btn btn-primary btn-lg btn-block {% if players|length < 5 %} disabled {% endif %}"
      href="{% url 'game' game_id=game.id player_id=self.id %}">Start Game</a>
 {% endif %}
 {% endblock %}
