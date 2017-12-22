@@ -21,14 +21,46 @@
 
 {% block head %}
 <script src="{% static "javascript/vue.js" %}"></script>
+<script src="{% static "javascript/reconnecting-websocket.js" %}"></script>
 {% endblock %}
 
 {% block content %}
+{% verbatim %}
 <div id="app">
-  <p>I'm [[ self ]]</p>
-  <p>Players [[ players ]]</p>
-  <p>Game [[ game ]]</p>
+  <a v-if="game.is_started" class="btn btn-success btn-lg btn-block mb-3"
+     v-bind:href="`/game/${game.id}/${self.id}`">Go to game</a>
+
+  <p>Game code: <b>[[ game.joinable_id ]]</b></p>
+
+  <table class="table">
+    <thead>
+      <tr>
+          <th>Players ([[ players.length ]] total)</th>
+          <th v-if="self.is_host"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="player in players" v-bind:class="{ 'table-active' : (self.token == player.token) }">
+        <td>
+          [[ player.name ]]<span v-if="player.is_host"> (host)</span>
+        </td>
+        <td v-if="self.is_host">
+            <a v-if="(self.token != player.token) && !game.is_started"
+               v-bind:href="`/kick/${game.id}/${self.id}/${player.token}`"
+               class="close text-danger">
+              <span>&times;</span>
+            </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a v-if="self.is_host && !game.is_started"
+     class="btn btn-primary btn-lg btn-block"
+     v-bind:href="`/game/${game.id}/${self.id}`">Start Game</a>
 </div>
+{% endverbatim %}
+
 
 <script>
   // Abuse of django and javascript to load initial state into the
@@ -38,51 +70,28 @@
   var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
-    data: initialState
+    data: initialState,
+    methods: {
+      handleData: function (data) {
+        if (data.hasOwnProperty('self')) {
+          this.self = data.self;
+          if (this.self.is_kicked) {
+            window.location.reload(true);
+          }
+        }
+
+        this.game = data.game;
+        this.players = data.players;
+      }
+    }
   })
+
+  {% verbatim %}
+  var ws = new ReconnectingWebSocket(`ws://${window.location.host}${window.location.pathname}/`);
+  {% endverbatim %}
+  ws.onmessage = function(msg) {
+    app.handleData(JSON.parse(msg.data));
+  }
+
 </script>
-{% endblock %}
-
-{% block hidden %}
-{% if game.is_started %}
-<a class="btn btn-success btn-lg btn-block mb-3"
-   href="{% url 'game' game_id=game.id player_id=self.id %}">Go to game</a>
-{% endif %}
-
-<p>Game code: <b>{{ game.joinable_id }}</b></p>
-<p>Roles: {{ roles|join:", " }}</p>
-
-<table class="table">
-  <thead>
-    <tr>
-        <th>Players ({{ players|length }} total)</th>
-        {% if self.is_host %}
-        <th></th>
-      {% endif %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for player, is_you, is_host in players %}
-      <tr class="{% if is_you %} table-active {% endif %}">
-        <td>
-          {{ player.name }}
-          {% if is_host %}(host){% endif %}
-        </td>
-        <td>
-            {% if self.is_host and not is_you and not game.is_started %}
-              <a href="{% url 'kick' game_id=game.id player_id=self.id player_token=player.token %}"
-                class="close text-danger" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </a>
-            {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-{% if self.is_host and not game.is_started %}
-  <a class="btn btn-primary btn-lg btn-block {% if players|length < 5 %} disabled {% endif %}"
-     href="{% url 'game' game_id=game.id player_id=self.id %}">Start Game</a>
-{% endif %}
 {% endblock %}

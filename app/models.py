@@ -53,6 +53,7 @@ class Game(models.Model):
 
     def to_dict(self):
         return {
+            'id': str(self.id),
             'joinable_id': self.joinable_id,
             'is_started': self.is_started,
             'has_mordred': self.has_mordred,
@@ -103,10 +104,15 @@ class Player(models.Model):
         self.is_kicked = True
         self.save()
 
-    def to_dict(self):
-        return {
+    def to_dict(self, is_self=False):
+        data = {
             'token': str(self.token),
             'name': self.name,
             'is_host': self.is_host,
             'is_kicked': self.is_kicked,
         }
+
+        if is_self:
+            data['id'] = str(self.id)
+
+        return data
