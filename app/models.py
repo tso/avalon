@@ -1,9 +1,13 @@
+from app.consumers import message_game, message_player
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from enumfields import Enum, EnumField
+import json
+import operator
 import random
 import string
 import uuid
+
 
 class Role(Enum):
     MERLIN = 'merlin'
@@ -47,6 +51,7 @@ class Game(models.Model):
     def start(self):
         self.is_started = True
         self.save()
+        message_game(self, lobby_json(self))
 
     def players(self):
         return self.player_set.filter(is_kicked=False).all()
@@ -67,9 +72,15 @@ class PlayerManager(models.Manager):
             raise ValueError('The game must be set')
 
         is_guest = user is None
-        player = self.model(user=user, name=name, game=game,
-                            is_guest=is_guest, is_host=is_host)
+        player = self.model(
+            user=user,
+            name=name,
+            game=game,
+            is_guest=is_guest,
+            is_host=is_host
+        )
         player.save(using=self._db)
+        message_game(game, lobby_json(game))
         return player
 
     def create_player(self, user, game, is_host):
@@ -103,6 +114,7 @@ class Player(models.Model):
     def kick(self):
         self.is_kicked = True
         self.save()
+        message_player(self.game, self, lobby_json(self.game, self))
 
     def to_dict(self, is_self=False):
         data = {
@@ -116,3 +128,16 @@ class Player(models.Model):
             data['id'] = str(self.id)
 
         return data
+
+
+def lobby_json(game, player=None):
+    players = sorted(game.players(), key=operator.attrgetter('created_at'))
+    data = {
+        'game': game.to_dict(),
+        'players': list(map(lambda p: p.to_dict(), players)),
+    }
+
+    if player:
+        data['self'] = player.to_dict(is_self=True)
+
+    return json.dumps(data)

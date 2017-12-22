@@ -1,27 +1,14 @@
 import operator
 import json
-from channels import Group
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from app.models import Game, Player
+from app.models import Game, Player, lobby_json
 
 
 def index_view(request):
     return render(request, 'index.html')
 
-
-def lobby_json(game, player, include_self=True):
-    players = sorted(game.players(), key=operator.attrgetter('created_at'))
-    data = {
-        'game': game.to_dict(),
-        'players': list(map(lambda p: p.to_dict(), players)),
-    }
-
-    if include_self:
-        data['self'] = player.to_dict(is_self=True)
-
-    return json.dumps(data)
 
 def lobby_view(request, game_id, player_id):
     game = Game.games.get(pk=game_id)
@@ -49,9 +36,6 @@ def kick_view(request, game_id, player_id, player_token):
 
     kicked_player = Player.players.get(token=player_token)
     kicked_player.kick()
-    Group(str(game_id) + str(kicked_player.id)).send({
-        'text': lobby_json(game, kicked_player, include_self=True)
-    })
     return redirect('lobby', game_id=game_id, player_id=player_id)
 
 
@@ -68,10 +52,6 @@ def game_view(request, game_id, player_id):
             return redirect('lobby', game_id=game_id, player_id=player_id)
 
         game.start() # should assign roles etc
-
-    Group(str(game_id)).send({
-        'text': lobby_json(game, player, include_self=False)
-    })
 
     # should give list of who they saw
     return render(request, 'game.html', {
@@ -116,10 +96,6 @@ def join_game_view(request):
         player = Player.players.create_guest_player(
             game=game, name=name.title(), is_host=False
         )
-
-        Group(str(game.id)).send({
-            'text': lobby_json(game, player, include_self=False)
-        })
 
         return redirect('lobby', game_id=game.id, player_id=player.id)
 

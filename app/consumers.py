@@ -1,20 +1,27 @@
 from channels import Group
-from app.models import Game, Player
-from app.views import lobby_json
+from channels.auth import http_session_user
+from channels.security.websockets import allowed_hosts_only
 
+
+def message_player(game, player, content):
+    Group(str(game.id) + str(player.id)).send({
+        'text': content,
+    })
+
+
+def message_game(game, content):
+    Group(str(game.id)).send({
+        'text': content,
+    })
 
 # Connected to websocket.connect
+@allowed_hosts_only
+@http_session_user
 def ws_connect(message, game_id, player_id):
     # Accept connection
     message.reply_channel.send({"accept": True})
     Group(game_id).add(message.reply_channel)
     Group(game_id + player_id).add(message.reply_channel)
-
-    game = Game.games.get(pk=game_id)
-    player = Player.players.get(pk=player_id)
-    Group(game_id).send({
-        'text': lobby_json(game, player, include_self=False)
-    })
 
     # Probably check that this is like, real? if it's not
     # then message.reply_channel.send({"close": True})

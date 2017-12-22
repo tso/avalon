@@ -21,7 +21,7 @@
 
 {% block head %}
 <script src="{% static "javascript/vue.js" %}"></script>
-<script src="{% static "javascript/reconnecting-websocket.js" %}"></script>
+<script src="{% static "channels/js/websocketbridge.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -65,9 +65,12 @@
 <script>
   // Abuse of django and javascript to load initial state into the
   // javascript. All other state updates come from websockets.
-  var initialState = {{ json|safe }};
+  let initialState = {{ json|safe }};
+  {% verbatim %}
+  const ws_url = `ws://${window.location.host}${window.location.pathname}/`;
+  {% endverbatim %}
 
-  var app = new Vue({
+  const app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: initialState,
@@ -86,12 +89,11 @@
     }
   })
 
-  {% verbatim %}
-  var ws = new ReconnectingWebSocket(`ws://${window.location.host}${window.location.pathname}/`);
-  {% endverbatim %}
-  ws.onmessage = function(msg) {
-    app.handleData(JSON.parse(msg.data));
-  }
+  const webSocketBridge = new channels.WebSocketBridge();
+  webSocketBridge.connect(ws_url);
+  webSocketBridge.listen(function(action, stream) {
+    app.handleData(action);
+  });
 
 </script>
 {% endblock %}
