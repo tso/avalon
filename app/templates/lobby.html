@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Lobby{% endblock %}
 
@@ -18,40 +19,27 @@
   </nav>
 {% endblock %}
 
-{% block script %}
-function getHTML(url, callback) {
-  if (!window.XMLHttpRequest) return;
-  var xhr = new XMLHttpRequest();
-
-  xhr.onload = function() {
-    if (callback && typeof(callback) === 'function') {
-      callback(this.responseXML);
-    }
-  }
-
-  xhr.open('GET', url, true);
-  xhr.responseType = 'document';
-  xhr.send();
-}
-
-setInterval(function() {
-  getHTML(window.location.href, function(response) {
-    let current_html = document.querySelector('#content');
-    let response_html = response.querySelector('#content');
-    if (!current_html.isEqualNode(response_html)) {
-      current_html.innerHTML = response_html.innerHTML;
-      // Detect whether we've been kicked or not (if we have then we hard
-      // refresh).
-      if (current_html.children[1].innerText == "Create Game"
-       && current_html.children[2].innerText == "Join Game") {
-        window.location.reload(true);
-      }
-    }
-  })
-}, 2000);
+{% block head %}
+<script src="{% static "javascript/vue.js" %}"></script>
 {% endblock %}
 
 {% block content %}
+<div id="app">
+  [[ message ]]
+</div>
+
+<script>
+  var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+</script>
+{% endblock %}
+
+{% block hidden %}
 {% if game.is_started %}
 <a class="btn btn-success btn-lg btn-block mb-3"
    href="{% url 'game' game_id=game.id player_id=self.id %}">Go to game</a>
