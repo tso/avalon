@@ -1,4 +1,5 @@
 import operator
+import json
 from django.shortcuts import render, redirect
 from app.models import Game, Player
 from django.contrib import messages
@@ -18,19 +19,15 @@ def lobby_view(request, game_id, player_id):
         return redirect('index')
 
     players = sorted(game.players(), key=operator.attrgetter('created_at'))
-    players = [(p, p == player, p.is_host) for p in players]
-
-    roles = []
-    if game.has_mordred:
-        roles.append('Mordred')
-    if game.has_oberon:
-        roles.append('Oberon')
 
     return render(request, 'lobby.html', {
         'game': game,
-        'roles': roles,
         'self': player,
-        'players': players,
+        'json': json.dumps({
+            'self': player.to_dict(),
+            'game': game.to_dict(),
+            'players': list(map(lambda p: p.to_dict(), players)),
+        })
     })
 
 

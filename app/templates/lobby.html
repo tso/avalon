@@ -25,16 +25,20 @@
 
 {% block content %}
 <div id="app">
-  [[ message ]]
+  <p>I'm [[ self ]]</p>
+  <p>Players [[ players ]]</p>
+  <p>Game [[ game ]]</p>
 </div>
 
 <script>
+  // Abuse of django and javascript to load initial state into the
+  // javascript. All other state updates come from websockets.
+  var initialState = {{ json|safe }};
+
   var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
-    data: {
-      message: 'Hello Vue!'
-    }
+    data: initialState
   })
 </script>
 {% endblock %}

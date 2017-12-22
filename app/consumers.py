@@ -12,20 +12,12 @@ def ws_connect(message, game_id, player_id):
     game = Game.games.get(pk=game_id)
     player = Player.players.get(pk=player_id)
     players = sorted(game.players(), key=operator.attrgetter('created_at'))
-    players = [{'name': p.name, 'token': str(p.token), 'is_host': p.is_host} for p in players]
 
     Group(game_id).send({
         'text': json.dumps({
-            'self': {
-                'is_host': player.is_host,
-                'token': str(player.token),
-            },
-            'game': {
-                'joinable_id': game.joinable_id,
-                'is_started': False,
-                'roles': 'Oberon',
-            },
-            'players': players,
+            'self': player.to_dict(),
+            'game': game.to_dict(),
+            'players': list(map(lambda p: p.to_dict(), players)),
         })
     })
 

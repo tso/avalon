@@ -42,6 +42,8 @@ class Game(models.Model):
     has_mordred = models.BooleanField(default=False)
     has_oberon = models.BooleanField(default=False)
 
+    games = GameManager()
+
     def start(self):
         self.is_started = True
         self.save()
@@ -49,7 +51,13 @@ class Game(models.Model):
     def players(self):
         return self.player_set.filter(is_kicked=False).all()
 
-    games = GameManager()
+    def to_dict(self):
+        return {
+            'joinable_id': self.joinable_id,
+            'is_started': self.is_started,
+            'has_mordred': self.has_mordred,
+            'has_oberon': self.has_oberon,
+        }
 
 
 class PlayerManager(models.Manager):
@@ -94,3 +102,11 @@ class Player(models.Model):
     def kick(self):
         self.is_kicked = True
         self.save()
+
+    def to_dict(self):
+        return {
+            'token': str(self.token),
+            'name': self.name,
+            'is_host': self.is_host,
+            'is_kicked': self.is_kicked,
+        }
