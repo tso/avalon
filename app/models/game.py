@@ -1,8 +1,9 @@
 import random
 import string
 import uuid
-from app.consumers import message_game
+from app.avalon import assign_roles
 from django.db import models
+from channels import Group
 from .util import lobby_json
 
 
@@ -33,11 +34,17 @@ class Game(models.Model):
 
     def start(self):
         self.is_started = True
+        assign_roles(self)
         self.save()
-        message_game(self, lobby_json(self))
+        self.message_players()
 
     def players(self):
         return self.player_set.filter(is_kicked=False).all()
+
+    def message_players(self):
+        Group(str(self.id)).send({
+            'text': lobby_json(self),
+        })
 
     def to_dict(self):
         return {
@@ -47,4 +54,3 @@ class Game(models.Model):
             'has_mordred': self.has_mordred,
             'has_oberon': self.has_oberon,
         }
-

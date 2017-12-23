@@ -20,6 +20,6 @@
 {% endblock %}
 
 {% block content %}
-You are: [role]
-You saw: [players]
+<p>You are: <b>{{ self.role }}</b></p>
+<p>You saw: {% for player in seen %} {{ player.name }} {% endfor %}</p>
 {% endblock %}

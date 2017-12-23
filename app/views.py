@@ -2,6 +2,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from app.avalon import players_seen
 from app.models import Game, Player, lobby_json
 
 
@@ -60,14 +61,18 @@ class GameView(View):
             return redirect('lobby', game_id=game_id, player_id=player_id)
 
         game.start()
-        return self.get(request, game_id, player_id)
+        return redirect('game', game_id=game_id, player_id=player_id)
 
     def get(self, request, game_id, player_id):
         game = Game.games.get(pk=game_id)
         player = Player.players.get(pk=player_id)
+
+        print(players_seen(game, player))
+
         return render(request, self.template_name, {
             'game': game,
             'self': player,
+            'seen': players_seen(game, player),
         })
 
 
@@ -78,7 +83,7 @@ class CreateGameView(View):
         name = request.POST.get('name')
         if not name:
             messages.add_message(request, messages.ERROR, 'Name cannot be blank')
-            return self.get(request)
+            return redirect('create_game')
 
         game = Game.games.create_game(
             request.POST.get('has_mordred', 'off') == 'on',
@@ -103,7 +108,7 @@ class JoinGameView(View):
         name = request.POST.get('name')
         if not name:
             messages.add_message(request, messages.ERROR, 'Name cannot be blank')
-            return self.get(request)
+            return redirect('join_game')
 
         try:
             game = Game.games.get(
@@ -112,7 +117,7 @@ class JoinGameView(View):
             )
         except ObjectDoesNotExist:
             messages.add_message(request, messages.ERROR, 'Could not find that game')
-            return self.get(request)
+            return redirect('join_game')
 
         player = Player.players.create_guest_player(
             game=game,

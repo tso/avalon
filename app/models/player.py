@@ -1,7 +1,7 @@
 import uuid
 from app.avalon import Role
-from app.consumers import message_game, message_player
 from django.db import models
+from channels import Group
 from enumfields import EnumField
 from .util import lobby_json
 from .game import Game
@@ -22,7 +22,7 @@ class PlayerManager(models.Manager):
             is_host=is_host
         )
         player.save(using=self._db)
-        message_game(game, lobby_json(game))
+        game.message_players()
         return player
 
     def create_player(self, user, game, is_host):
@@ -56,7 +56,12 @@ class Player(models.Model):
     def kick(self):
         self.is_kicked = True
         self.save()
-        message_player(self.game, self, lobby_json(self.game, self))
+        self.message_player()
+
+    def message_player(self):
+        Group(str(self.game.id) + str(self.id)).send({
+            'text': lobby_json(self.game, self),
+        })
 
     def to_dict(self, is_self=False):
         data = {
