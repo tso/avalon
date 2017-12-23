@@ -55,9 +55,13 @@
     </tbody>
   </table>
 
-  <a v-if="self.is_host && !game.is_started"
-     class="btn btn-primary btn-lg btn-block"
-     v-bind:href="`/game/${game.id}/${self.id}`">Start Game</a>
+  <form v-if="self.is_host && !game.is_started" v-bind:action="`/game/${game.id}/${self.id}`" method="post">
+    {% endverbatim %}
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary btn-lg btn-block">Start Game</button>
+    {% verbatim %}
+  </form>
+
 </div>
 {% endverbatim %}
 

@@ -3,17 +3,6 @@ from channels.auth import http_session_user
 from channels.security.websockets import allowed_hosts_only
 
 
-def message_player(game, player, content):
-    Group(str(game.id) + str(player.id)).send({
-        'text': content,
-    })
-
-
-def message_game(game, content):
-    Group(str(game.id)).send({
-        'text': content,
-    })
-
 # Connected to websocket.connect
 @allowed_hosts_only
 @http_session_user
@@ -31,3 +20,15 @@ def ws_connect(message, game_id, player_id):
 def ws_disconnect(message, game_id, player_id):
     Group(game_id).discard(message.reply_channel)
     Group(game_id + player_id).discard(message.reply_channel)
+
+
+def message_player(game, player, content):
+    Group(str(game.id) + str(player.id)).send({
+        'text': content,
+    })
+
+
+def message_game(game, content):
+    Group(str(game.id)).send({
+        'text': content,
+    })
