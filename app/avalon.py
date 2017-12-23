@@ -1,3 +1,15 @@
+from enumfields import Enum
+
+
+class Role(Enum):
+    MERLIN = 'merlin'
+    PERCIVAL = 'percival'
+    VANILLA_GOOD = 'vanilla_good'
+    VANILLA_BAD = 'vanilla_bad'
+    MORGANA = 'morgana'
+    ASSASSIN = 'assassin'
+    OBERON = 'oberon'
+
 TOTAL_BAD = {
     5: 2,
     6: 2,

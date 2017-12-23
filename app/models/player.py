@@ -1,20 +1,11 @@
 import uuid
+from app.avalon import Role
 from app.consumers import message_game, message_player
 from django.db import models
-from enumfields import Enum, EnumField
+from enumfields import EnumField
 from .util import lobby_json
 from .game import Game
 from .user import User
-
-
-class Role(Enum):
-    MERLIN = 'merlin'
-    PERCIVAL = 'percival'
-    VANILLA_GOOD = 'vanilla_good'
-    VANILLA_BAD = 'vanilla_bad'
-    MORGANA = 'morgana'
-    ASSASSIN = 'assassin'
-    OBERON = 'oberon'
 
 
 class PlayerManager(models.Manager):
