@@ -35,8 +35,8 @@
   <table class="table">
     <thead>
       <tr>
-          <th>Players ([[ players.length ]] total)</th>
-          <th v-if="self.is_host"></th>
+          <th>Players</th>
+          <th class="text-right">[[ players.length ]]/[[ game.num_players ]]</th>
       </tr>
     </thead>
     <tbody>
@@ -44,8 +44,8 @@
         <td>
           [[ player.name ]]<span v-if="player.is_host"> (host)</span>
         </td>
-        <td v-if="self.is_host">
-            <a v-if="(self.token != player.token) && !game.is_started"
+        <td>
+            <a v-if="self.is_host && (self.token != player.token) && !game.is_started"
                v-bind:href="`/kick/${game.id}/${self.id}/${player.token}`"
                class="close text-danger">
               <span>&times;</span>

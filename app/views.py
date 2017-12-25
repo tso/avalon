@@ -2,7 +2,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from app.avalon import players_seen
+from app.avalon import player_info
 from app.models import Game, Player, lobby_json
 
 
@@ -60,6 +60,10 @@ class GameView(View):
             messages.add_message(request, messages.ERROR, 'Only the host can start the game')
             return redirect('lobby', game_id=game_id, player_id=player_id)
 
+        if game.num_players != len(game.players()):
+            messages.add_message(request, messages.ERROR, "The lobby isn't full")
+            return redirect('lobby', game_id=game_id, player_id=player_id)
+
         game.start()
         return redirect('game', game_id=game_id, player_id=player_id)
 
@@ -67,12 +71,13 @@ class GameView(View):
         game = Game.games.get(pk=game_id)
         player = Player.players.get(pk=player_id)
 
-        print(players_seen(game, player))
+        thumbs_seen, eyes_seen = player_info(game, player)
 
         return render(request, self.template_name, {
             'game': game,
             'self': player,
-            'seen': players_seen(game, player),
+            'thumbs_seen': thumbs_seen,
+            'eyes_seen': eyes_seen,
         })
 
 
@@ -80,12 +85,16 @@ class CreateGameView(View):
     template_name = 'create_game.html'
 
     def post(self, request):
-        name = request.POST.get('name')
+        name = request.POST.get('name', '')
         if not name:
             messages.add_message(request, messages.ERROR, 'Name cannot be blank')
             return redirect('create_game')
+        request.session['name'] = name
+
+        num_players = int(request.POST.get('num_players', 5))
 
         game = Game.games.create_game(
+            num_players,
             request.POST.get('has_mordred', 'off') == 'on',
             request.POST.get('has_oberon', 'off') == 'on',
         )
@@ -109,6 +118,7 @@ class JoinGameView(View):
         if not name:
             messages.add_message(request, messages.ERROR, 'Name cannot be blank')
             return redirect('join_game')
+        request.session['name'] = name
 
         try:
             game = Game.games.get(
@@ -117,6 +127,10 @@ class JoinGameView(View):
             )
         except ObjectDoesNotExist:
             messages.add_message(request, messages.ERROR, 'Could not find that game')
+            return redirect('join_game')
+
+        if len(game.players()) >= game.num_players:
+            messages.add_message(request, messages.ERROR, 'Lobby is full')
             return redirect('join_game')
 
         player = Player.players.create_guest_player(

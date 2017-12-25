@@ -21,5 +21,16 @@
 
 {% block content %}
 <p>You are: <b>{{ self.role }}</b></p>
-<p>You saw: {% for player in seen %} {{ player.name }} {% endfor %}</p>
+{% if thumbs_seen %}
+  <p>You saw the thumbs of:
+  {% for player in thumbs_seen %}
+    {{ player.name }}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% endif %}
+  {% endfor %}</p>
+{% endif %}
+{% if eyes_seen %}
+  <p>You stared into the eyes of:
+    {% for player in eyes_seen %}
+      {{ player.name }}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% endif %}
+    {% endfor %}</p>
+{% endif %}
 {% endblock %}

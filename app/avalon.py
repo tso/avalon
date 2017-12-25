@@ -1,12 +1,14 @@
+from enum import Enum as PyEnum
+from enum import auto
 from enumfields import Enum
 from random import shuffle
 
 
 class Role(Enum):
     # Good
+    VANILLA_GOOD = 'vanilla_good'
     MERLIN = 'merlin'
     PERCIVAL = 'percival'
-    VANILLA_GOOD = 'vanilla_good'
     # Bad
     VANILLA_BAD = 'vanilla_bad'
     MORGANA = 'morgana'
@@ -14,63 +16,116 @@ class Role(Enum):
     MORDRED = 'mordred'
     OBERON = 'oberon'
 
-
 VISIBLE_BAD = [Role.VANILLA_BAD, Role.MORGANA, Role.ASSASSIN, Role.OBERON]
 NOT_OBERON = [Role.VANILLA_BAD, Role.MORGANA, Role.ASSASSIN, Role.MORDRED]
 
-# A Role sees ROLE_MECHANICS[Role] in nightphase.
+
+class Interaction(PyEnum):
+    SEE_THUMB = auto()
+    SEE_EYES = auto()
+
+SEE_THUMB = Interaction.SEE_THUMB
+SEE_EYES = Interaction.SEE_EYES
+
 ROLE_MECHANICS = {
-    Role.MERLIN: VISIBLE_BAD,
-    Role.PERCIVAL: [Role.MERLIN, Role.MORGANA],
-    Role.VANILLA_GOOD: [],
-    Role.VANILLA_BAD: NOT_OBERON,
-    Role.MORGANA: NOT_OBERON,
-    Role.ASSASSIN: NOT_OBERON,
-    Role.MORDRED: NOT_OBERON,
-    Role.OBERON: [],
+    # Good
+    Role.VANILLA_GOOD: {
+        SEE_THUMB: [],
+        SEE_EYES: [],
+    },
+    Role.MERLIN: {
+        SEE_THUMB: VISIBLE_BAD,
+        SEE_EYES: [],
+    },
+    Role.PERCIVAL: {
+        SEE_THUMB: [Role.MERLIN, Role.MORGANA],
+        SEE_EYES: [],
+    },
+    # Bad
+    Role.VANILLA_BAD: {
+        SEE_THUMB: [],
+        SEE_EYES: NOT_OBERON,
+    },
+    Role.MORGANA: {
+        SEE_THUMB: [],
+        SEE_EYES: NOT_OBERON,
+    },
+    Role.ASSASSIN: {
+        SEE_THUMB: [],
+        SEE_EYES: NOT_OBERON,
+    },
+    Role.MORDRED: {
+        SEE_THUMB: [],
+        SEE_EYES: NOT_OBERON,
+    },
+    Role.OBERON: {
+        SEE_THUMB: [],
+        SEE_EYES: [],
+    },
 }
 
-TOTAL_BAD = {
-    5: 2,
-    6: 2,
-    7: 3,
-    8: 3,
-    9: 3,
-    10: 4,
-}
 
-DEFAULTS = {
-    5: [Role.MERLIN, Role.PERCIVAL, Role.VANILLA_GOOD, Role.MORGANA, Role.ASSASSIN],
-    6: [Role.MERLIN, Role.PERCIVAL],
-    7: [Role.MERLIN, Role.PERCIVAL],
-    8: [Role.MERLIN, Role.PERCIVAL],
-    9: [Role.MERLIN, Role.PERCIVAL],
-    10: [Role.MERLIN, Role.PERCIVAL],
-}
+def gen_default(n):
+    if n == 5:
+        # 3 good 2 bad
+        return [Role.MERLIN, Role.PERCIVAL, Role.VANILLA_GOOD, Role.MORGANA, Role.ASSASSIN]
+    if n == 6:
+        # 4 good 2 bad
+        return gen_default(5) + [Role.VANILLA_GOOD]
+    if n == 7:
+        # 4 good 3 bad
+        return gen_default(6) + [Role.VANILLA_BAD]
+    if n == 8:
+        # 5 good 3 bad
+        return gen_default(7) + [Role.VANILLA_GOOD]
+    if n == 9:
+        # 5 good 4 bad
+        return gen_default(8) + [Role.VANILLA_BAD]
+    if n == 10:
+        # 6 good 4 bad
+        return gen_default(9) + [Role.VANILLA_GOOD]
 
 
-def players_seen(game, player):
-    '''
-    Players seen takes in a game and a player whose role has been
-    decided and returns a list of players who they "saw" during
-    nightphase.
-    '''
+def apply_settings(defaults, mordred, oberon):
+    if mordred:
+        if Role.VANILLA_BAD in defaults:
+            defaults.remove(Role.VANILLA_BAD)
+        else:
+            defaults.remove(Role.ASSASSIN)
+        defaults.append(Role.MORDRED)
+
+    if oberon:
+        if Role.VANILLA_BAD in defaults:
+            defaults.remove(Role.VANILLA_BAD)
+        else:
+            defaults.remove(Role.ASSASSIN)
+        defaults.append(Role.OBERON)
+
+    return defaults
+
+
+def player_info(game, player):
     players = game.players()
-    roles_seen = ROLE_MECHANICS[player.role]
-    other_players_seen = []
+    eyes_seen = ROLE_MECHANICS[player.role][SEE_EYES]
+    thumbs_seen = ROLE_MECHANICS[player.role][SEE_THUMB]
+    player_thumbs_seen = []
+    player_eyes_seen = []
     for p in players:
-        if p.role in roles_seen and p != player:
-            other_players_seen.append(p)
-    return other_players_seen
+        if p == player:
+            continue
+
+        if p.role in thumbs_seen:
+            player_thumbs_seen.append(p)
+        if p.role in eyes_seen:
+            player_eyes_seen.append(p)
+
+    return player_thumbs_seen, player_eyes_seen
 
 
 def assign_roles(game):
-    '''
-    Assign roles takes in a game and using game.roles assigns each
-    player randomly a role.
-    '''
     players = game.players()
-    roles = DEFAULTS[len(players)]
+    defaults = gen_default(game.num_players)
+    roles = apply_settings(defaults, game.has_mordred, game.has_oberon)
     shuffle(roles)
     for player, role in zip(players, roles):
         player.set_role(role)

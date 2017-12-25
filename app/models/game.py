@@ -8,14 +8,16 @@ from .util import lobby_json
 
 
 class GameManager(models.Manager):
-    def create_game(self, has_mordred, has_oberon):
+    def create_game(self, num_players, has_mordred, has_oberon):
         joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
         # For the set of all unstarted games joinable ID must be unique
         while self.filter(is_started=False, joinable_id=joinable_id):
             joinable_id = ''.join(random.choices(string.ascii_uppercase, k=4))
 
         game = self.model(joinable_id=joinable_id,
-                          has_mordred=has_mordred, has_oberon=has_oberon)
+                          num_players=num_players,
+                          has_mordred=has_mordred,
+                          has_oberon=has_oberon)
         game.save(using=self._db)
         return game
 
@@ -29,6 +31,7 @@ class Game(models.Model):
 
     has_mordred = models.BooleanField(default=False)
     has_oberon = models.BooleanField(default=False)
+    num_players = models.PositiveIntegerField(default=5)
 
     games = GameManager()
 
@@ -51,6 +54,7 @@ class Game(models.Model):
             'id': str(self.id),
             'joinable_id': self.joinable_id,
             'is_started': self.is_started,
+            'num_players': self.num_players,
             'has_mordred': self.has_mordred,
             'has_oberon': self.has_oberon,
         }
