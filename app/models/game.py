@@ -1,6 +1,7 @@
 import random
 import string
 import uuid
+import operator
 from app.avalon import assign_roles
 from django.db import models
 from channels import Group
@@ -42,7 +43,9 @@ class Game(models.Model):
         self.message_players()
 
     def players(self):
-        return self.player_set.filter(is_kicked=False).all()
+        players = self.player_set.filter(is_kicked=False).all()
+        players = sorted(players, key=operator.attrgetter('created_at'))
+        return players
 
     def message_players(self):
         Group(str(self.id)).send({

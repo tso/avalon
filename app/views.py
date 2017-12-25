@@ -76,6 +76,7 @@ class GameView(View):
         return render(request, self.template_name, {
             'game': game,
             'self': player,
+            'players': game.players(),
             'thumbs_seen': thumbs_seen,
             'eyes_seen': eyes_seen,
         })

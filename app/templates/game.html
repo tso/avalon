@@ -21,16 +21,23 @@
 
 {% block content %}
 <p>You are: <b>{{ self.role }}</b></p>
-{% if thumbs_seen %}
-  <p>You saw the thumbs of:
-  {% for player in thumbs_seen %}
-    {{ player.name }}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% endif %}
-  {% endfor %}</p>
-{% endif %}
-{% if eyes_seen %}
-  <p>You stared into the eyes of:
-    {% for player in eyes_seen %}
-      {{ player.name }}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% endif %}
-    {% endfor %}</p>
-{% endif %}
+<p>Roles: Merlin, Percival, Vanilla Good, Assassin, etc, etc, etc</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>Players</th>
+        {% if thumbs_seen %}<th class="text-right">Thumb seen</th>{% endif %}
+        {% if eyes_seen %}<th class="text-right">Eyes seen</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for player in players %}
+    <tr class="{% if player == self %}table-active{% endif %}">
+      <td>{{ player.name }}</td>
+      {% if thumbs_seen %}<td class="text-right">{% if player in thumbs_seen %}✓{% endif %}</td>{% endif %}
+      {% if eyes_seen %}<td class="text-right">{% if player in eyes_seen %}✓{% endif %}</td>{% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
