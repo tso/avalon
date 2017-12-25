@@ -22,11 +22,16 @@
 {% block head %}
 <script src="{% static "javascript/vue.js" %}"></script>
 <script src="{% static "channels/js/websocketbridge.js" %}"></script>
+<style>
+  [v-cloak] {
+    display: none;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 {% verbatim %}
-<div id="app">
+<div v-cloak id="app">
   <a v-if="game.is_started" class="btn btn-success btn-lg btn-block mb-3"
      v-bind:href="`/game/${game.id}/${self.id}`">Go to game</a>
 
@@ -91,7 +96,7 @@
         this.players = data.players;
       }
     }
-  })
+  });
 
   const webSocketBridge = new channels.WebSocketBridge();
   webSocketBridge.connect(ws_url);
