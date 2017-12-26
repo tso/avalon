@@ -11,3 +11,10 @@ $ mkdir tmp
 $ python manage.py migrate
 $ DJANGO_SETTINGS_MODULE='avalon.settings.local' python manage.py runserver
 ```
+
+## Deploy
+
+```bash
+$ DJANGO_SETTINGS_MODULE='avalon.settings.production' python manage.py compilescss
+$ DJANGO_SETTINGS_MODULE='avalon.settings.production' python manage.py collectstatic
+```
