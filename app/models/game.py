@@ -45,8 +45,7 @@ class Game(models.Model):
         self.message_players()
 
     def players(self):
-        players = self.player_set.filter(is_kicked=False).order_by('created_at').all()
-        return players
+        return self.player_set.filter(is_kicked=False).order_by('created_at').all()
 
     def message_players(self):
         Group(str(self.id)).send({
