@@ -1,7 +1,8 @@
-from django.views import View
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render, redirect
+from django.views import View
+
 from app.avalon import player_info
 from app.models import Game, Player, lobby_json
 

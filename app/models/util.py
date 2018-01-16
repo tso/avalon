@@ -1,5 +1,6 @@
 import json
 
+
 def lobby_json(game, player=None):
     data = {
         'game': game.to_dict(),

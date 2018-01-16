@@ -1,11 +1,13 @@
 import uuid
-from app.avalon import Role
-from django.db import models
+
 from channels import Group
+from django.db import models
 from enumfields import EnumField
-from .util import lobby_json
+
+from app.avalon import Role
 from .game import Game
 from .user import User
+from .util import lobby_json
 
 
 class PlayerManager(models.Manager):

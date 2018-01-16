@@ -1,7 +1,8 @@
 from enum import Enum as PyEnum
 from enum import auto
-from enumfields import Enum
 from random import shuffle
+
+from enumfields import Enum
 
 
 class Role(Enum):
@@ -16,6 +17,7 @@ class Role(Enum):
     MORDRED = 'mordred'
     OBERON = 'oberon'
 
+
 VISIBLE_BAD = [Role.VANILLA_BAD, Role.MORGANA, Role.ASSASSIN, Role.OBERON]
 NOT_OBERON = [Role.VANILLA_BAD, Role.MORGANA, Role.ASSASSIN, Role.MORDRED]
 
@@ -23,6 +25,7 @@ NOT_OBERON = [Role.VANILLA_BAD, Role.MORGANA, Role.ASSASSIN, Role.MORDRED]
 class Interaction(PyEnum):
     SEE_THUMB = auto()
     SEE_EYES = auto()
+
 
 SEE_THUMB = Interaction.SEE_THUMB
 SEE_EYES = Interaction.SEE_EYES
