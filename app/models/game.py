@@ -1,10 +1,12 @@
+import operator
 import random
 import string
 import uuid
-import operator
-from app.avalon import assign_roles
-from django.db import models
+
 from channels import Group
+from django.db import models
+
+from app.avalon import assign_roles
 from .util import lobby_json
 
 
@@ -43,8 +45,7 @@ class Game(models.Model):
         self.message_players()
 
     def players(self):
-        players = self.player_set.filter(is_kicked=False).all()
-        players = sorted(players, key=operator.attrgetter('created_at'))
+        players = self.player_set.filter(is_kicked=False).order_by('created_at').all()
         return players
 
     def message_players(self):
