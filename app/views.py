@@ -77,11 +77,11 @@ class GameView(View):
         return render(request, self.template_name, {
             'game': game,
             'self': player,
+            'roles': game.players().order_by('role').values_list('role', flat=True),
             'players': game.players(),
             'thumbs_seen': thumbs_seen,
             'eyes_seen': eyes_seen,
         })
-
 
 class CreateGameView(View):
     template_name = 'create_game.html'
