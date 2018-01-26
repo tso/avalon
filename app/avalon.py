@@ -127,6 +127,7 @@ def player_info(game, player):
 
     return player_thumbs_seen, player_eyes_seen
 
+
 def assign_roles(game):
     players = game.players()
     roles = gen_role_list(game.num_players, game.has_mordred, game.has_oberon)

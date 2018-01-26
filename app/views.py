@@ -83,6 +83,7 @@ class GameView(View):
             'eyes_seen': eyes_seen,
         })
 
+
 class CreateGameView(View):
     template_name = 'create_game.html'
 
